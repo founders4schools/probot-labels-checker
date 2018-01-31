@@ -1,0 +1,6 @@
+staging:
+  label: staging
+  success: Merged into staging
+  pending: Not yet merged!
+uat:
+  label: UAT OK
