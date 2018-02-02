@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "eslint": "^4.6.1",
+    "eslint-config-probot": "^0.1.0",
     "eslint-plugin-markdown": "^1.0.0-beta.6",
     "jsdoc": "^3.5.5",
     "jsdoc-strip-async-await": "^0.1.0",
@@ -54,5 +55,8 @@
   "engines": {
     "node": "8.9.4",
     "npm": "5.6.0"
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-probot"
   }
 }
