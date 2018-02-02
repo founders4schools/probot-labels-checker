@@ -29,12 +29,9 @@ async function setStatusForLabel(status, labelConfig, action, context) {
 
 async function onLabelChanged(status, action, context) {
   const config = await loadConfig(context);
-  Object.keys(config).map(key => {
-    const labelConfig = config[key];
-    if (context.payload.label.name === labelConfig.label) {
-      setStatusForLabel(status, labelConfig, action, context);
-    }
-  });
+  Object.keys(config)
+    .filter(k => config[k].label === context.payload.label.name)
+    .map(k => setStatusForLabel(status, config[k], action, context));
 }
 
 async function onLabelAdded(context) {
