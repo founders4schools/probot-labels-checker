@@ -1,6 +1,14 @@
 const yaml = require('js-yaml');
 const slugify = require('slugify');
 
+function logEvent(context, msg) {
+  console.log(
+      'Received event from ' + context.payload.repository.full_name +
+      ' PR#' + context.payload.pull_request.number +
+      ' - ' + msg
+  );
+}
+
 async function loadConfig(context) {
   const content = await context.github.repos.getContent(context.repo({
       path: '.github/prs-label-checker.yml'
@@ -12,7 +20,7 @@ async function setStatusForLabel(status, labelConfig, action, context) {
   const statusMsg = labelConfig[status] ? labelConfig[status] : `Label '${labelConfig.label}' ${action}`;
   const labelSlug = slugify(labelConfig.label).toLowerCase();
   const statusContext = `label/${labelSlug}`;
-  console.info("Setting status to " + status);
+  logEvent(context, "Setting status to " + statusMsg);
   await context.github.repos.createStatus(context.repo({
     sha: context.payload.pull_request.head.sha,
     state: status,
@@ -28,19 +36,22 @@ async function onLabelChanged(status, action, context) {
     if(context.payload.label.name === labelConfig.label) {
       await setStatusForLabel(status, labelConfig, action, context);
     }
-    
+
   }
 }
 
 async function onLabelAdded(context) {
+  logEvent(context, "Label added: " + context.payload.label.name);
   await onLabelChanged('success', 'present', context);
 }
 
 async function onLabelRemoved(context) {
+  logEvent(context, "Label removed: " + context.payload.label.name);
   await onLabelChanged('pending', 'missing', context);
 }
 
 async function onPullRequestOpened(context) {
+  logEvent(context, "Pull request opened");
   const config = await loadConfig(context);
   for(const key in config) {
     const labelConfig = config[key];
@@ -49,6 +60,8 @@ async function onPullRequestOpened(context) {
 }
 
 module.exports = (robot) => {
+  console.log("App ready");
+
   // Set status pending by default
   robot.on('pull_request.opened', onPullRequestOpened);
   
