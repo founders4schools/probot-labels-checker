@@ -29,12 +29,12 @@ async function setStatusForLabel(status, labelConfig, action, context) {
 
 async function onLabelChanged(status, action, context) {
   const config = await loadConfig(context);
-  for (const key in config) {
+  Object.keys(config).map(key => {
     const labelConfig = config[key];
-    if(context.payload.label.name === labelConfig.label) {
-      await setStatusForLabel(status, labelConfig, action, context);
+    if (context.payload.label.name === labelConfig.label) {
+      setStatusForLabel(status, labelConfig, action, context);
     }
-  }
+  });
 }
 
 async function onLabelAdded(context) {
@@ -50,13 +50,10 @@ async function onLabelRemoved(context) {
 async function onPullRequestOpened(context) {
   logEvent(context, 'Pull request opened');
   const config = await loadConfig(context);
-  for (const key in config) {
-    const labelConfig = config[key];
-    await setStatusForLabel('pending', labelConfig, 'missing', context);
-  }
+  Object.keys(config).map(key => setStatusForLabel('pending', config[key], 'missing', context));
 }
 
-module.exports = (robot) => {
+module.exports = robot => {
   console.log('App ready');
 
   // Set status pending by default
