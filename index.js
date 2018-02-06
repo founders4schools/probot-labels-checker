@@ -8,10 +8,15 @@ function logEvent(context, msg) {
 }
 
 async function loadConfig(context) {
-  const content = await context.github.repos.getContent(context.repo({
-    path: '.github/prs-label-checker.yml'
-  }));
-  return yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
+  try {
+    const content = await context.github.repos.getContent(context.repo({
+      path: '.github/prs-label-checker.yml'
+    }));
+    return yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
+  } catch (err) {
+    console.error(`Error while trying to get config for repository ${context.payload.repository.full_name}`);
+    return {};
+  }
 }
 
 async function setStatusForLabel(status, labelConfig, action, context) {
